@@ -50,6 +50,8 @@
 				
 				float3 specularReflection = reflect(-lightDirection, normalDirection);
 				specularReflection = dot(specularReflection, viewDirection);
+				specularReflection = max(0.0, specularReflection);
+				specularReflection = max(0.0, dot(normalDirection, lightDirection)) * specularReflection;
 				
 				toReturn.pixelCol = float4(specularReflection, 1.0);
 				toReturn.pixelPos = mul(UNITY_MATRIX_MVP, input.vertexPos);
