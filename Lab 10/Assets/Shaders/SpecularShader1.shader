@@ -1,5 +1,5 @@
-﻿// SpecularShader.shader
-Shader "Custom/SpecularShader" { // Basic shader for Lab 10
+﻿// SpecularShader1.shader
+Shader "Custom/SpecularShader1" { // Lab 10 Shader for On Your Own #1 (a)
 	Properties {
 		_Color ("Color Tint", Color) = (1,1,1,1)
 		_SpecColour("Specular Color", Color) = (1,1,1,1)
@@ -56,7 +56,7 @@ Shader "Custom/SpecularShader" { // Basic shader for Lab 10
 				specularReflection = max(0.0, dot(normalDirection, lightDirection)) * specularReflection;
 				float3 finalLight = specularReflection + diffuseReflection + UNITY_LIGHTMODEL_AMBIENT;
 
-				toReturn.pixelCol = float4(finalLight * _Color, 1.0);
+				toReturn.pixelCol = float4(finalLight * _Color.rgb * attenuation * _SpecColour.rgb, 1.0);
 				toReturn.pixelPos = mul(UNITY_MATRIX_MVP, input.vertexPos);
 				return toReturn;
 			}
