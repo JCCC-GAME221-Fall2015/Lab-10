@@ -32,14 +32,17 @@
 			struct outputStruct
 			{
 				float4 pixelPos: SV_POSITION;
-				float4 pixelCol: COLOR;
+				//float4 pixelCol: COLOR;
+				
+				float3 normalDirection: TEXCOORD0;
+				float4 pixelWorldPos: TEXCOORD1;
 			};
 			
 			//vertex program
 			outputStruct vertexFunction(inputStruct input)
 			{
 				outputStruct toReturn;
-				
+				/*
 				float3 normalDirection = normalize(mul(float4(input.vertexNormal,0.0), _World2Object).xyz);
 				float3 viewDirection = normalize(float3(float4(_WorldSpaceCameraPos.xyz, 1.0) - mul(_Object2World, input.vertexPos).xyz));
 				
@@ -50,11 +53,16 @@
 				
 				float3 specularReflection = reflect(-lightDirection, normalDirection);
 				specularReflection = dot(specularReflection, viewDirection);
-				specularReflection = max(0.0, specularReflection);
+				specularReflection = pow(max(0.0, specularReflection), _Shininess);
 				specularReflection = max(0.0, dot(normalDirection, lightDirection)) * specularReflection;
 				
-				toReturn.pixelCol = float4(specularReflection, 1.0);
+				float3 finalLight = specularReflection + diffuseReflection + UNITY_LIGHTMODEL_AMBIENT;
+				
+				toReturn.pixelCol = float4(finalLight * _Color, 1.0);*/
 				toReturn.pixelPos = mul(UNITY_MATRIX_MVP, input.vertexPos);
+				
+				toReturn.normalDirection = input.vertexNormal;
+				toReturn.pixelWorldPos = input.vertexPos;
 				
 				return toReturn;
 			}
@@ -62,7 +70,23 @@
 			//fragment program
 			float4 fragmentFunction(outputStruct input) : COLOR
 			{
-				return input.pixelCol;
+				float3 normalDirection = normalize(mul(float4(input.normalDirection,0.0), _World2Object).xyz);
+				float3 viewDirection = normalize(float3(float4(_WorldSpaceCameraPos.xyz, 1.0) - mul(_Object2World, input.pixelWorldPos).xyz));
+				
+				float3 lightDirection = normalize(_WorldSpaceLightPos0.xyz);
+				float attenuation = 1.0;
+				
+				float3 diffuseReflection = attenuation * _LightColor0.xyz * max(0.0, dot(normalDirection, lightDirection));
+				
+				float3 specularReflection = reflect(-lightDirection, normalDirection);
+				specularReflection = dot(specularReflection, viewDirection);
+				specularReflection = pow(max(0.0, specularReflection), _Shininess);
+				specularReflection = max(0.0, dot(normalDirection, lightDirection)) * specularReflection;
+				
+				float3 finalLight = specularReflection + diffuseReflection + UNITY_LIGHTMODEL_AMBIENT;
+			
+				//return input.pixelCol;//float4(finalLight * _Color, 1.0)
+				return float4(finalLight * _Color, 1.0);
 			}
 			ENDCG
 		}
