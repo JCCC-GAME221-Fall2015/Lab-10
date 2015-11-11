@@ -1,4 +1,4 @@
-﻿Shader "Custom/SpecularLightShader" 
+﻿Shader "Custom/SpecularLightShaderII" 
 {
 	Properties 
 	{
@@ -34,40 +34,40 @@
 				float3 normalDirection : TEXCOORD0;
 				float4 pixelWorldPos: TEXCOORD1;
 			};
-
 			
 			SpecularOutput SpecularVertexFunction(SpecularInput input)
 			{
 				SpecularOutput returnSpec;
 				
-				float3 lightDirection;
-				float attenuation = 1.0;
-
 				float3 normalDirection = normalize(mul(float4(input.vertexNormal, 0.0), _Object2World).xyz);
+				returnSpec.normalDirection = normalDirection;
 				
-				float3 viewDirection = normalize(float3(float4(_WorldSpaceCameraPos.xyz, 1.0) - mul(_Object2World, input.vertexPos).xyz).xyz);				
+				float3 viewDirection = normalize(float3(float4(_WorldSpaceCameraPos.xyz, 1.0) - mul(_Object2World, input.vertexPos).xyz).xyz);	
+				returnSpec.pixelWorldPos = float4(viewDirection, 1.0);	
 				
-				lightDirection = normalize(_WorldSpaceLightPos0.xyz);
-				float3 diffuseReflection = attenuation * _LightColor0.xyz * max(0.0, dot(normalDirection, lightDirection));
-		
-				float3 specularReflection = reflect(-lightDirection, normalDirection); 
-				specularReflection = dot(specularReflection, viewDirection);
-				specularReflection = pow(max(0.0, specularReflection), _Shininess);
-				specularReflection = max(0.0, dot(normalDirection, lightDirection)) * specularReflection;
-				
-				float3 finalLight = specularReflection + diffuseReflection + UNITY_LIGHTMODEL_AMBIENT;
-				
-				
-				returnSpec.pixelCol = float4(finalLight * _Color, 1.0);
 				returnSpec.pixelPos = mul(UNITY_MATRIX_MVP, input.vertexPos);
-				
 				
 				return returnSpec;
 			}
 			
 			float4 SpecularFragmentFunction(SpecularOutput input) : COLOR
-			{
-				return input.pixelCol;
+			{			
+				float3 lightDirection;
+				float attenuation = 1.0;
+
+				lightDirection = normalize(_WorldSpaceLightPos0.xyz);
+				float3 diffuseReflection = attenuation * _LightColor0.xyz * max(0.0, dot(input.normalDirection, lightDirection));
+				
+				float3 specularReflection = reflect(lightDirection, input.normalDirection); // Most likely source of error
+				specularReflection = dot(specularReflection, input.pixelWorldPos.xyz);
+				specularReflection = pow(max(0.0, specularReflection), _Shininess);
+				specularReflection = max(0.0, dot(input.normalDirection, lightDirection)) * specularReflection;
+				
+				float3 finalLight = specularReflection + diffuseReflection + UNITY_LIGHTMODEL_AMBIENT.rgb;
+				
+				input.pixelCol = float4(finalLight * _Color, 1.0);
+				
+				return input.pixelCol * _SpecColor;
 			}
 			
 			ENDCG
@@ -75,3 +75,4 @@
 	} 
 	FallBack "Diffuse"
 }
+

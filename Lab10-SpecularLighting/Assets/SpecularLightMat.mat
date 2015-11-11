@@ -7,7 +7,7 @@ Material:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_Name: SpecularLightMat
-  m_Shader: {fileID: 4800000, guid: 3fdae217a9dacb04ca3f0ae548617334, type: 3}
+  m_Shader: {fileID: 4800000, guid: edd0d28ae44e4944fa4d78bf48b13c75, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 5
   m_CustomRenderQueue: -1
@@ -93,6 +93,14 @@ Material:
         second: .5
       data:
         first:
+          name: _Shininess
+        second: 25
+      data:
+        first:
+          name: _Shine
+        second: 10
+      data:
+        first:
           name: _Parallax
         second: .0199999996
       data:
@@ -127,10 +135,6 @@ Material:
         first:
           name: _Metallic
         second: 0
-      data:
-        first:
-          name: _Shine
-        second: 10
     m_Colors:
       data:
         first:
